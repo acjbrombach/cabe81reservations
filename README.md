@@ -1,4 +1,4 @@
-# cabe81reservations / D-INFK Master Thesis Lab Reservation Checker
+# D-INFK Master Thesis Lab Reservation Checker
 The D-INFK Master Thesis Lab is a great place to work because it has plenty of space in a quiet environment.
 But to work there, a registration is required, which can only be made by D-INFK staff members.
 
