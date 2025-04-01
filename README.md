@@ -7,5 +7,4 @@ However, there usually are some desks that are not reserved, but people will get
 You can check out the current reservations at <a href="https://cab-e-81.inf.ethz.ch/reservation/overview">https://cab-e-81.inf.ethz.ch/reservation/overview</a>, but the overview is not very well designed.
 
 So, out of procrastination I wrote a little script to parse their page and display the reservation status for each table on the plan:
-![plan](cab-e-81.png)
-![plan](reservations.png)
+![original-plan](cab-e-81.png) ![updated-plan](reservations.png)
