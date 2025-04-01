@@ -102,11 +102,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
         <p>Regarding the cronjob, I sometimes wondered why changes were not immediately displayed. At first, I assumed that it was a caching issue, because when I ran the script manually, the file got updated again. Then,  I ran across a similar problem on another small project: a script gets executed by cron to insert events into a database. Strangely, new database entries were always missing at first, but showed up when running the script manually.</p>
         <p>Nothing wrong here, right?</p>
         <code># check lab reservation<br>
-        00 6 * * * python3 /var/www/reservationchecker/main.py >/dev/null 2>&1 &</code>
+        00 */6 * * * python3 /var/www/reservationchecker/main.py >/dev/null 2>&1 &</code>
         <p>After searching around, I found the culprit: crontab executes everything from the home directory, but my scripts were relying on relative paths. And indeed: there was a <code>reservations.png</code> file in my home directory, with its modification date matching the cronjob's last run. Wow.</p>
         <p>There are two possible fixes:</p>
         <p>Either change the working directory prior to executing the file in cron:</p>
-        <code>00 6 * * * <span style="color:green;">cd /var/www/reservationchecker &&</span> python3 /var/www/reservationchecker/main.py >/dev/null 2>&1 &</code>
+        <code>00 */6 * * * <span style="color:green;">cd /var/www/reservationchecker &&</span> python3 /var/www/reservationchecker/main.py >/dev/null 2>&1 &</code>
         <p>Or use absolute paths in Python:</p>
         <code>filename = <span style="color:green;">os.path.dirname(os.path.realpath(__file__)) +</span> "/reservations.png"</code>
         <p>The only question remaining: is there any difference between <code>os.path.realpath(os.path.dirname(__file__))</code> and <code>os.path.dirname(os.path.realpath(__file__))</code>?</p>
