@@ -1,0 +1,122 @@
+<!--
+This work is free. You can redistribute it and/or modify it under the
+terms of the Do What The Fuck You Want To Public License, Version 2,
+as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="no-store" http-equiv="Cache-Control"/>
+    <meta content="no-cache" http-equiv="Cache-Control"/>
+    <meta content="no-cache" http-equiv="Pragma"/>
+    <link rel="icon" href="data:,">
+    <title>D-INFK Master Thesis Lab Reservations</title>
+    <style>
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3 {
+            line-height: 1.2
+        }
+
+	h3 {
+	    margin-top: 2em;
+	}
+
+        #image_container {
+            min-height: 100vh;
+            min-width: 100vw;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #image_container img {
+            height: auto;
+            width: 100vw;
+        }
+
+        @media only screen and (min-width: 900px) {
+            /* For desktop: */
+            #image_container img {
+                width: auto;
+                height: 100vh;
+            }
+        }
+
+        #text_container {
+            align-content: start;
+            padding: 10px 20px;
+            font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background: #F5E8DD;
+            overflow-wrap: break-word;
+        }
+
+        .footer {
+            font-size: 14px;
+            line-height: 1.5;
+	    margin-top: 2em;
+        }
+    </style>
+    <script>
+        // The image is regenerated every day, this is just a static web page. But caching is a bit difficult to control on the client side.
+        // Hacky solution to avoid caching: append date string to the image URL
+        window.onload = () => {
+            let img = document.getElementById('reservation_image');
+            let d = new Date();
+            img.src = img.src + "?a=" + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate() + "_" + d.getHours() + ":" + d.getMinutes();
+            console.log(img.src);
+        };
+    </script>
+</head>
+
+<body>
+
+<div id="container">
+    <div id="image_container">
+        <img alt="reservations" id="reservation_image" src="reservations.png"/>
+    </div>
+    <div id="text_container">
+        <h1>About</h1>
+        <p>The D-INFK Master Thesis Lab is a great place to work because it has plenty of space in a quiet environment.
+            But to work there, a registration is required, which can only be made by D-INFK staff members.</p>
+        <p>However, there usually are some desks that are not reserved, but people will get angry if you steal their seat.</p>
+        <p>You can check out the current reservations at <a href="https://cab-e-81.inf.ethz.ch/reservation/overview">https://cab-e-81.inf.ethz.ch/reservation/overview</a>,
+            but the overview is not very well designed.</p>
+        <p>So, out of procrastination I wrote a little <a href="main.py">script</a> to parse their page and display the
+            reservation status for each table on the plan.
+            It runs on my Raspberry Pi and gets executed daily via cronjob.</p>
+        
+        <h3>Update 2024-02-26</h3>
+        <p>Regarding the cronjob, I sometimes wondered why changes were not immediately displayed. At first, I assumed that it was a caching issue, because when I ran the script manually, the file got updated again. Then,  I ran across a similar problem on another small project: a script gets executed by cron to insert events into a database. Strangely, new database entries were always missing at first, but showed up when running the script manually.</p>
+        <p>Nothing wrong here, right?</p>
+        <code># check lab reservation<br>
+        00 */6 * * * python3 /var/www/reservationchecker/main.py >/dev/null 2>&1 &</code>
+        <p>After searching around, I found the culprit: crontab executes everything from the home directory, but my scripts were relying on relative paths. And indeed: there was a <code>reservations.png</code> file in my home directory, with its modification date matching the cronjob's last run. Wow.</p>
+        <p>There are two possible fixes:</p>
+        <p>Either change the working directory prior to executing the file in cron:</p>
+        <code>00 */6 * * * <span style="color:green;">cd /var/www/reservationchecker &&</span> python3 /var/www/reservationchecker/main.py >/dev/null 2>&1 &</code>
+        <p>Or use absolute paths in Python:</p>
+        <code>filename = <span style="color:green;">os.path.dirname(os.path.realpath(__file__)) +</span> "/reservations.png"</code>
+        <p>The only question remaining: is there any difference between <code>os.path.realpath(os.path.dirname(__file__))</code> and <code>os.path.dirname(os.path.realpath(__file__))</code>?</p>
+
+        <h3>Update 2025-04-01</h3>
+        <p>After one too many power outages due to a toaster and a flat iron being plugged in at the same time, I decided to move this page to a cloud server.</p>
+        <p>Not only does this ease my conscience a little, it also gives me an opportunity to retire my Raspberry Pi for other projects, to learn more about webservers and the whole CI/CD craze.</p>
+
+        <p class="footer">© 2025 <a href="http://www.wtfpl.net/">WTFPL</a> – <i>Do What the Fuck You Want to</i> Public License.</p>
+    </div>
+</div>
+</body>
+</html>
